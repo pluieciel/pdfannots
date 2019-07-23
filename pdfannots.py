@@ -404,9 +404,11 @@ class PrettyPrinter:
             else:
                 self._printheader_called = True
             print("## " + name + "\n", file=outfile)
-
-        highlights_g = [a for a in annots if a.tagname == 'Highlight' and a.contents is None and a.color[1]>0.9]
-        highlights_r = [a for a in annots if a.tagname == 'Highlight' and a.contents is None and a.color[0]>0.9]
+        #for highlight in green:
+        highlights_g = [a for a in annots if a.tagname == 'Highlight' and a.contents is None and a.color[1]>0.9 and a.color[0]<0.9]
+        #for highlight in red:
+        highlights_r = [a for a in annots if a.tagname == 'Highlight' and a.contents is None and a.color[0]>0.9 and a.color[1]<0.9]
+        #BTW, highlight in yellow is [1,1,0]
         #comments = [a for a in annots if a.tagname not in ANNOT_NITS and a.contents]
         #nits = [a for a in annots if a.tagname in ANNOT_NITS]
 
