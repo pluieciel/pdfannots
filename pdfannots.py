@@ -136,7 +136,7 @@ class Page:
 
 
 class Annotation:
-    def __init__(self, page, tagname, coords=None, rect=None, contents=None):
+    def __init__(self, page, tagname, coords=None, rect=None, contents=None, color):
         self.page = page
         self.tagname = tagname
         if contents == '':
@@ -241,6 +241,7 @@ def getannots(pdfannots, page):
     annots = []
     for pa in pdfannots:
         subtype = pa.get('Subtype')
+        color = pa.get('C')
         if subtype is not None and subtype.name not in ANNOT_SUBTYPES:
             continue
 
@@ -253,7 +254,7 @@ def getannots(pdfannots, page):
 
         coords = pdftypes.resolve1(pa.get('QuadPoints'))
         rect = pdftypes.resolve1(pa.get('Rect'))
-        a = Annotation(page, subtype.name, coords, rect, contents)
+        a = Annotation(page, subtype.name, coords, rect, contents, color)
         annots.append(a)
 
     return annots
@@ -404,16 +405,21 @@ class PrettyPrinter:
                 self._printheader_called = True
             print("## " + name + "\n", file=outfile)
 
-        highlights = [a for a in annots if a.tagname == 'Highlight' and a.contents is None]
-        comments = [a for a in annots if a.tagname not in ANNOT_NITS and a.contents]
-        nits = [a for a in annots if a.tagname in ANNOT_NITS]
+        highlights_g = [a for a in annots if a.tagname == 'Highlight' and a.contents is None and a.color[1]>0.9]
+        highlights_r = [a for a in annots if a.tagname == 'Highlight' and a.contents is None and a.color[0]>0.9]
+        #comments = [a for a in annots if a.tagname not in ANNOT_NITS and a.contents]
+        #nits = [a for a in annots if a.tagname in ANNOT_NITS]
 
         for secname in sections:
-            if highlights and secname == 'highlights':
-                printheader("Highlights")
-                for a in highlights:
+            if highlights_g and secname == 'highlights_g':
+                printheader("Highlights_g")
+                for a in highlights_g:
                     print(self.format_annot(a), file=outfile)
-
+            if highlights_r and secname == 'highlights_r':
+                printheader("Highlights_r")
+                for a in highlights_r:
+                    print(self.format_annot(a), file=outfile)
+'''
             if comments and secname == 'comments':
                 printheader("Detailed comments")
                 for a in comments:
@@ -427,7 +433,7 @@ class PrettyPrinter:
                     else:
                         extra = None
                     print(self.format_annot(a, extra), file=outfile)
-
+'''
 
 def resolve_dest(doc, dest):
     if isinstance(dest, bytes):
@@ -542,7 +548,7 @@ def parse_args():
                    help="number of columns per page in the document (default: 2)")
 
     g = p.add_argument_group('Options controlling output format')
-    allsects = ["highlights", "comments", "nits"]
+    allsects = ["highlights_g", "highlights_r"]
     g.add_argument("-s", "--sections", metavar="SEC", nargs="*",
                    choices=allsects, default=allsects,
                    help=("sections to emit (default: %s)" % ', '.join(allsects)))
