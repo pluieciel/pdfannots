@@ -593,7 +593,7 @@ def main(inp):
 
     return 0
 
-path='C:/Users/c30557/Desktop/data with labels/'
+path='C:/Users/xxx/Desktop/data with labels/'
 outpath='./'
 
 for r, d, f in os.walk(path):
